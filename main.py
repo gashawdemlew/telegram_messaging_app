@@ -33,10 +33,11 @@ class ChatInfoResponse(BaseModel):
 
 @app.post("/send-amen-gym-reminder", response_model=TelegramResponse)
 async def send_reminder(payload: TelegramRequest):
-    start = time.time()
+    start_time = time.perf_counter() # More accurate for duration
     message = amen_gym_payment_message()
 
     try:
+        # Wrap the call in a lambda to maintain the signature required by retry_async
         await retry_async(
             lambda: send_telegram_message(
                 chat_id=payload.chat_id,
@@ -46,14 +47,17 @@ async def send_reminder(payload: TelegramRequest):
             base_delay=2
         )
     except Exception as e:
+        # Log the error here if needed
         raise HTTPException(
             status_code=500,
             detail=f"Failed after retries: {str(e)}"
         )
 
+    duration = round((time.perf_counter() - start_time) * 1000, 2)
+    
     return {
         "status": "Message sent successfully",
-        "response_time_ms": round((time.time() - start) * 1000, 2)
+        "response_time_ms": duration
     }
 
 # -----------------------------
