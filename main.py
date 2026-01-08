@@ -7,8 +7,18 @@ from telegram_async import send_telegram_message
 from telegram_updates import get_latest_chat_info
 from templates import amen_gym_payment_message
 from retry import retry_async
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="Amen Gym Telegram Messaging API")
+
+# Allow CORS for front-end communication
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # -----------------------------
 # Models
